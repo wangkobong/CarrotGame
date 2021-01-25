@@ -1,4 +1,5 @@
 'use strict';
+import Popup from './popup.js';
 
 const CARROT_SIZE = 80;
 const CARROT_COUNT = 5;
@@ -11,9 +12,7 @@ const gameBtn = document.querySelector('.game__button');
 const gameTimer = document.querySelector('.game__timer');
 const gameScore = document.querySelector('.game__score');
 
-const popUp = document.querySelector('.pop-up');
-const popUpText = document.querySelector('.pop-up__message');
-const popUpRefresh = document.querySelector('.pop-up__refresh');
+
 
 const carrotSound = new Audio('./sound/carrot_pull.mp3');
 const alertSound = new Audio('./sound/alert.wav');
@@ -27,8 +26,12 @@ let started = false;
 let score = 0;
 let timer = undefined;
 
-field.addEventListener('click', onFiledClick);
+const gameFinishBanner = new Popup();
+gameFinishBanner.setClickListener(() => {
+  startGame();
+});
 
+field.addEventListener('click', onFiledClick);
 gameBtn.addEventListener('click', () =>{
   if(started){
     stopGame();
@@ -37,12 +40,6 @@ gameBtn.addEventListener('click', () =>{
   }
 });
 
-
-popUpRefresh.addEventListener('click', () => {
-  startGame();
-  hidePopUP(); 
-  showGameButton();
-});
 
 function startGame(){
     started = true;
@@ -56,7 +53,7 @@ function stopGame(){
   started = false;
   stopGameTimer();
   hideGameButton();
-  showPopUpWithText('REPLAY?');
+  gameFinishBanner.showWithText('REPLAY?');
   playSound(alertSound);
   stopSound(bgSound);
 }
@@ -71,7 +68,7 @@ function finishGame(win){
   }
   stopGameTimer();
   stopSound(bgSound);
-  showPopUpWithText(win? 'YOU WON' : 'YOU LOST');
+  gameFinishBanner.showWithText(win? 'YOU WON' : 'YOU LOST');
 }
 
 
@@ -111,7 +108,7 @@ function startGameTimer(){
 function stopGameTimer (){
   clearInterval(timer);
   hideGameButton();
-  showPopUpWithText('REPLAY?');
+  gameFinishBanner.showWithText('REPLAY?');
 };
 
 function updateTimerText(time){
@@ -119,21 +116,13 @@ function updateTimerText(time){
   const seconds = time % 60;
   gameTimer.innerText = `${minutes}:${seconds}`;
 }
-function showPopUpWithText(text){
-  popUpText.innerText = text;
-  popUp.classList.remove('pop-up--hide');
-}
 
-function hidePopUP(){
-  popUp.classList.add('pop-up--hide');
-}
 
 function initGame(){
   score = 0;
   field.innerHTML = '';
   gameScore.innerText = CARROT_COUNT;
   // 벌레와 당근을 생성한 뒤 field에 추가해 줌
-  console.log(fieldRect);
   addItem('carrot', CARROT_COUNT, 'img/carrot.png');
   addItem('bug', BUG_COUNT, 'img/bug.png');
 }
